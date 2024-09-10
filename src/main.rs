@@ -1,7 +1,7 @@
 /*
  * Dru Banks (s0krat3z)
  * Blue Cord Security
- * Version 0.1.0
+ * Version 1.0.0
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-use std::{collections::HashSet, hash::Hash}; // Useful for storing unique subdomains
+use std::collections::HashSet; // Useful for storing unique subdomains
 use std::error::Error;
-use clap::{App, Arg};
+use clap::{Command, Arg};
 use reqwest;
 use serde::Deserialize;
 use colored::*;
@@ -35,7 +35,7 @@ _________                __   _________
 
 "#;
 
-#[derive(Debug, Deserialize)] //Struct for certificate info afetr JSON deserialization
+#[derive(Debug, Deserialize)] //Struct for certificate info after JSON deserialization
 struct CertificateInfo {
     name_value: String,
 }
@@ -63,22 +63,21 @@ async fn get_subdomains(domain: &str) -> Result<HashSet<String>, Box<dyn Error>>
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     println!("{}", BANNER);
-    let matches = App::new("CertSPY-RS")
-        .version("1.0")
+    let matches = Command::new("CertSPY-RS")
+        .version("1.0.0")
         .author("Dru Banks (S0KRAT3Z)")
-        .about("Subdomain enumeration tool using crt.sh")
+        .about("Rust subdomain enumeration tool using crt.sh")
         .arg(
-            Arg::with_name("domain")
+            Arg::new("domain")
                 .short('d')
                 .long("domain")
                 .value_name("DOMAIN")
                 .help("Website to enumerate")
                 .required(true)
-                .takes_value(true),
         )
         .get_matches();
 
-    let domain = matches.value_of("domain").unwrap();
+    let domain = matches.get_one::<String>("domain").unwrap();
     let subdomains = get_subdomains(domain).await?;
     if !subdomains.is_empty() {
         println!("{}", format!("[*] Subdomains of {}:", domain).green());
